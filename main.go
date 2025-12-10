@@ -48,7 +48,7 @@ func main() {
 
 	scanner := bufio.NewScanner(os.Stdin)
 
-	var word string
+	var cmd string
 	var area string
 
 	config := &shared.Config{
@@ -64,34 +64,31 @@ func main() {
 		}
 		input := scanner.Text()
 
-		switch input {
+		cmd = cleanInput(input)[0]
+		switch cmd {
 		case "help":
-			word = cleanInput(input)[0]
 			cmds["help"].Callback(config, nil)
 			fmt.Println()
 		case "map":
-			word = cleanInput(input)[0]
 			cmds["map"].Callback(config, nil)
 			fmt.Println()
 		case "mapb":
-			word = cleanInput(input)[0]
 			cmds["mapb"].Callback(config, nil)
 			fmt.Println()
 		case "explore":
-			word = cleanInput(input)[0]
 			area = cleanInput(input)[1]
+			fmt.Println("JTK - ", area)
 			cmds["explore"].Callback(config, area)
 			fmt.Println()
 		case "exit":
-			word = cleanInput(input)[0]
 			cmds["exit"].Callback(config, nil)
 			fmt.Println()
 		default:
-			word = cleanInput(input)[0]
+			fmt.Println("An invalid command was received. Please type 'help' to see a list of valid commands")
 			fmt.Println()
 		}
 
-		fmt.Printf("Your command was: %s\n", word)
+		fmt.Printf("Your command was: %s\n", cmd)
 		fmt.Println()
 
 		if err := scanner.Err(); err != nil {

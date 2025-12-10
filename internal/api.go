@@ -18,7 +18,7 @@ var baseURL = "https://pokeapi.co/api/v2/"
 //Endpoint: https://pokeapi.co/api/v2/location-area
 //Returns 20 locations from the pokemon world
 
-func CommandMap(cfg *shared.Config) error {
+func CommandMap(cfg *shared.Config, opts ...any) error {
 
 	fmt.Println("Display the Pokemon map regions! \n ")
 	var mapURL string
@@ -64,7 +64,7 @@ func CommandMap(cfg *shared.Config) error {
 	return nil
 }
 
-func CommandMapBack(cfg *shared.Config) error {
+func CommandMapBack(cfg *shared.Config, opts ...any) error {
 	// Check if there's a previous page
 	if cfg.Previous == nil {
 		fmt.Println("You're on the first page already!")
@@ -102,6 +102,10 @@ func CommandMapBack(cfg *shared.Config) error {
 		fmt.Printf("%s\n", result.Name)
 	}
 
+	return nil
+}
+
+func CommandExplore(cfg *shared.Config, opts ...any) error {
 	return nil
 }
 

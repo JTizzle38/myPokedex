@@ -13,7 +13,7 @@ type Config struct {
 type CLICommand struct {
 	Name        string
 	Description string
-	Callback    func(*Config) error
+	Callback    func(*Config, ...any) error
 }
 
 type LocationAreaData struct {

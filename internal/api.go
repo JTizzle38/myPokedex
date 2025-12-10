@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 
+	pc "github.com/JTizzle38/myPokedex/internal/pokecache"
 	"github.com/JTizzle38/myPokedex/shared"
 )
 
@@ -30,7 +31,7 @@ func CommandMap(cfg *shared.Config) error {
 	}
 
 	//Make the API call
-	data, err := GetJSON(mapURL)
+	data, err := GetJSON(mapURL, cfg.Cache)
 	if err != nil {
 		fmt.Printf("ERROR | api.go | CommandMap():  %s", err)
 	}
@@ -71,7 +72,7 @@ func CommandMapBack(cfg *shared.Config) error {
 	}
 
 	// Fetch the previous page
-	data, err := GetJSON(*cfg.Previous)
+	data, err := GetJSON(*cfg.Previous, cfg.Cache)
 	if err != nil {
 		return fmt.Errorf("failed to fetch location areas: %w", err)
 	}
@@ -105,9 +106,16 @@ func CommandMapBack(cfg *shared.Config) error {
 }
 
 // This is a generic function that can handle any REST API Calls [GET/POST/DELETE/PUT]
-func fetchJSONResponse(method, url string, body any, headers map[string]string) ([]byte, error) {
+func fetchJSONResponse(method, url string, body any, headers map[string]string, cache *pc.Cache) ([]byte, error) {
 
 	var bodyReader io.Reader
+
+	if method == "GET" && cache != nil {
+		if dataCache, found := cache.GetEntry(url); found {
+			fmt.Println("Using cached data...")
+			return dataCache, nil
+		}
+	}
 
 	// Encode body if present
 	if body != nil {
@@ -151,13 +159,13 @@ func fetchJSONResponse(method, url string, body any, headers map[string]string) 
 }
 
 // A wrapper function for making GET requests
-func GetJSON(url string) ([]byte, error) {
-	return fetchJSONResponse("GET", url, nil, nil)
+func GetJSON(url string, cache *pc.Cache) ([]byte, error) {
+	return fetchJSONResponse("GET", url, nil, nil, cache)
 }
 
 // A wrapper function for making POST requests
-func PostJSON(url string, body any, headers map[string]string) ([]byte, error) {
-	return fetchJSONResponse("POST", url, body, headers)
+func PostJSON(url string, body any, headers map[string]string, cache *pc.Cache) ([]byte, error) {
+	return fetchJSONResponse("POST", url, body, headers, cache)
 }
 
 //For reference:

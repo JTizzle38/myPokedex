@@ -1,8 +1,13 @@
 package shared
 
+import (
+	pc "github.com/JTizzle38/myPokedex/internal/pokecache"
+)
+
 type Config struct {
 	Next     *string
 	Previous *string
+	Cache    *pc.Cache
 }
 
 type CLICommand struct {

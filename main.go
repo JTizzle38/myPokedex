@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/JTizzle38/myPokedex/internal"
+	pc "github.com/JTizzle38/myPokedex/internal/pokecache"
 	"github.com/JTizzle38/myPokedex/shared"
 )
 
@@ -46,6 +48,7 @@ func main() {
 	config := &shared.Config{
 		Next:     nil,
 		Previous: nil,
+		Cache:    pc.NewCache(5 * time.Minute),
 	}
 
 	for {

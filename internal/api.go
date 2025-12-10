@@ -18,7 +18,7 @@ var baseURL = "https://pokeapi.co/api/v2/"
 //Endpoint: https://pokeapi.co/api/v2/location-area
 //Returns 20 locations from the pokemon world
 
-func CommandMap(cfg *shared.Config) error {
+func CommandMap(cfg *shared.Config, opts ...any) error {
 
 	fmt.Println("Display the Pokemon map regions! \n ")
 	var mapURL string
@@ -64,7 +64,7 @@ func CommandMap(cfg *shared.Config) error {
 	return nil
 }
 
-func CommandMapBack(cfg *shared.Config) error {
+func CommandMapBack(cfg *shared.Config, opts ...any) error {
 	// Check if there's a previous page
 	if cfg.Previous == nil {
 		fmt.Println("You're on the first page already!")
@@ -100,6 +100,47 @@ func CommandMapBack(cfg *shared.Config) error {
 	// Print the results
 	for _, result := range page.Results {
 		fmt.Printf("%s\n", result.Name)
+	}
+
+	return nil
+}
+
+func CommandExplore(cfg *shared.Config, opts ...any) error {
+	//Outputting the current city to be explored
+	//This should be the first word followed by the 'explore' command
+	//but let's do some quick validation just in case
+
+	if len(opts) == 0 {
+		return fmt.Errorf("ERROR | api.go | CommandExplore(): An area name is required from the list output from either the map/mapb commands")
+	}
+
+	area, ok := opts[0].(string)
+	if !ok {
+		return fmt.Errorf("ERROR | api.go | CommandExplore(): The area name must be of type string")
+	}
+
+	fmt.Printf("Exploring %s...", area)
+
+	//Creating the full URL to be used based on the received location area
+	exploreURL := baseURL + "location-area/" + area
+
+	//Make the API call
+	data, err := GetJSON(exploreURL, cfg.Cache)
+	if err != nil {
+		fmt.Errorf("ERROR | api.go | CommandExplore(): %s", err)
+	}
+
+	//Parse the data from the response
+	var areaData shared.LocationAreaDetail
+	err = json.Unmarshal(data, &areaData)
+	if err != nil {
+		return fmt.Errorf("ERROR | api.go | CommandExplore(): %s", err)
+	}
+
+	//Print the results of all the pokemon in the given location area
+	fmt.Println("Found Pokemon: ")
+	for _, p := range areaData.PokemonEncounters {
+		fmt.Printf("- %s\n", p.Pokemon.Name)
 	}
 
 	return nil
@@ -154,7 +195,10 @@ func fetchJSONResponse(method, url string, body any, headers map[string]string, 
 		return nil, fmt.Errorf("failed to read response body, %s", err)
 	}
 
-	defer resp.Body.Close()
+	if method == "GET" && cache != nil {
+		cache.AddEntry(url, data)
+	}
+
 	return data, nil
 }
 

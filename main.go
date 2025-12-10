@@ -36,6 +36,11 @@ func init() {
 			Description: "Displays the previous 20 location areas of the Pokemon world",
 			Callback:    internal.CommandMapBack,
 		},
+		"explore": {
+			Name:        "explore",
+			Description: "Allows you to explore all the pokemon available in a specific location area",
+			Callback:    internal.CommandExplore,
+		},
 	}
 }
 
@@ -43,7 +48,8 @@ func main() {
 
 	scanner := bufio.NewScanner(os.Stdin)
 
-	var word string
+	var cmd string
+	var area string
 
 	config := &shared.Config{
 		Next:     nil,
@@ -58,29 +64,31 @@ func main() {
 		}
 		input := scanner.Text()
 
-		switch input {
+		cmd = cleanInput(input)[0]
+		switch cmd {
 		case "help":
-			word = cleanInput(input)[0]
-			cmds["help"].Callback(config)
+			cmds["help"].Callback(config, nil)
 			fmt.Println()
 		case "map":
-			word = cleanInput(input)[0]
-			cmds["map"].Callback(config)
+			cmds["map"].Callback(config, nil)
 			fmt.Println()
 		case "mapb":
-			word = cleanInput(input)[0]
-			cmds["mapb"].Callback(config)
+			cmds["mapb"].Callback(config, nil)
+			fmt.Println()
+		case "explore":
+			area = cleanInput(input)[1]
+			fmt.Println("JTK - ", area)
+			cmds["explore"].Callback(config, area)
 			fmt.Println()
 		case "exit":
-			word = cleanInput(input)[0]
-			cmds["exit"].Callback(config)
+			cmds["exit"].Callback(config, nil)
 			fmt.Println()
 		default:
-			word = cleanInput(input)[0]
+			fmt.Println("An invalid command was received. Please type 'help' to see a list of valid commands")
 			fmt.Println()
 		}
 
-		fmt.Printf("Your command was: %s\n", word)
+		fmt.Printf("Your command was: %s\n", cmd)
 		fmt.Println()
 
 		if err := scanner.Err(); err != nil {
@@ -101,7 +109,7 @@ func cleanInput(text string) []string {
 }
 
 // Displays the help message and available commands for the Pokedex
-func CommandHelp(cfg *shared.Config) error {
+func CommandHelp(cfg *shared.Config, opts ...any) error {
 	fmt.Println("Welcome to the Pokedex! \nUsage: \n ")
 
 	for _, cmd := range cmds {
@@ -112,7 +120,7 @@ func CommandHelp(cfg *shared.Config) error {
 }
 
 // Exits the program
-func CommandExit(cfg *shared.Config) error {
+func CommandExit(cfg *shared.Config, opts ...any) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil

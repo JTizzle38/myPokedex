@@ -8,6 +8,7 @@ type Config struct {
 	Next     *string
 	Previous *string
 	Cache    *pc.Cache
+	Trainer  UserData
 }
 
 type CLICommand struct {
@@ -36,4 +37,32 @@ type PokemonEncounter struct {
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	} `json:"pokemon"`
+}
+
+type PokemonDetail struct {
+	ID             int    `json:"id"`
+	Name           string `json:"name"`
+	BaseExperience int    `json:"base_experience"`
+	Height         int    `json:"height"`
+	Weight         int    `json:"weight"`
+	Stats          []struct {
+		BaseStat int `json:"base_stat"`
+		Effort   int `json:"effort"`
+		Stat     struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"stat"`
+	} `json:"stats"`
+	Types []struct {
+		Slot int `json:"slot"`
+		Type struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"type"`
+	}
+}
+
+type UserData struct {
+	Name    string
+	Pokedex map[string]PokemonDetail
 }

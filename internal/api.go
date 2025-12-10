@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 
 	pc "github.com/JTizzle38/myPokedex/internal/pokecache"
@@ -144,6 +145,60 @@ func CommandExplore(cfg *shared.Config, opts ...any) error {
 	}
 
 	return nil
+}
+
+func CommandCatch(cfg *shared.Config, opts ...any) error {
+	if len(opts) == 0 {
+		return fmt.Errorf("ERROR | api.go | CommandCatch(): A pokemon name is required in order to use this catch command")
+	}
+
+	pokemon, ok := opts[0].(string)
+	if !ok {
+		return fmt.Errorf("ERROR | api.go | CommandCatch(): The pokemon name must be of type string")
+	}
+
+	fmt.Printf("Throwing a Pokeball at %s...", pokemon)
+
+	//Creating the full URL to be used based on the user input pokemon name
+	pokemonURL := baseURL + "pokemon/" + pokemon
+
+	//Make the API call
+	data, err := GetJSON(pokemonURL, cfg.Cache)
+	if err != nil {
+		fmt.Errorf("ERROR | api.go | CommandCatch(): %s", err)
+	}
+
+	//Parse the data from the response
+	var pokemonData shared.PokemonDetail
+	err = json.Unmarshal(data, &pokemonData)
+	if err != nil {
+		return fmt.Errorf("ERROR | api.go | CommandCatch(): %s", err)
+	}
+
+	//Calculate the RNG of catching the pokemon
+	//User get's 3 chances to catch the mentioned pokemon
+	var catchChance int
+	for i := 0; i < 3; i++ {
+		catchChance = rand.Intn(150)
+		fmt.Printf("Throwing a Pokeball at %s...", pokemonData.Name)
+		if catchChance >= pokemonData.BaseExperience {
+			fmt.Printf("%s was caught!", pokemonData.Name)
+
+			//Saving the captured pokemon to the trainer's pokedex
+			cfg.Trainer.Pokedex[pokemonData.Name] = pokemonData
+			break
+		} else {
+			fmt.Printf("Attempting to catch %s again \n", pokemonData.Name)
+		}
+	}
+
+	//Checks the pokedex to see if the pokemon was captured successfully
+	if _, exists := cfg.Trainer.Pokedex[pokemonData.Name]; !exists {
+		fmt.Printf("%s escaped!", pokemonData.Name)
+	}
+
+	return nil
+
 }
 
 // This is a generic function that can handle any REST API Calls [GET/POST/DELETE/PUT]
